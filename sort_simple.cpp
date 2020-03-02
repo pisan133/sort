@@ -4,25 +4,30 @@
  **/
 
 #include <iostream>
-#include <array>
+#include <vector>
 
 using namespace std;
 
-void printArray(const int items[], int asize) {
-  for (int i = 0; i < asize; ++i) {
-    cout << items[i] << " ";
+ostream& operator<<(ostream& os, const vector<int>& v) {
+  os << "[";
+  if (!v.empty()) {
+    os << v[0];
+    for (int i = 1; i < v.size(); ++i) {
+      os << "  " << v[i];
+    }
   }
-  cout << endl;
+  os << "]";
+  return os;
 }
 
-void fillRandom(int items[], int asize) {
-  for (int i = 0; i < asize; ++i) {
+void fillRandom(vector<int>& items) {
+  for (int i = 0; i < items.size(); ++i) {
     items[i] = rand() % 100;
   }
 }
 
-int linearSearch(const int items[], int asize, int key) {
-  for (int i = 0; i < asize; ++i) {
+int linearSearch(const vector<int>& items, int key) {
+  for (int i = 0; i < items.size(); ++i) {
     if (key == items[i]) {
       return i;
     }
@@ -30,9 +35,9 @@ int linearSearch(const int items[], int asize, int key) {
   return -1;
 }
 
-int binarySearch(const int items[], int asize, int &key) {
+int binarySearch(const vector<int>& items, int key) {
   int low = 0;
-  int high = asize - 1;
+  int high = items.size() - 1;
   int middle{(low + high + 1) / 2};
 
   while (low <= high) {
@@ -49,8 +54,8 @@ int binarySearch(const int items[], int asize, int &key) {
   return -1;
 }
 
-void insertionSort(int items[], int asize) {
-  for (int next = 1; next < asize; ++next) {
+void insertionSort(vector<int>& items) {
+  for (int next = 1; next < items.size(); ++next) {
     int insert = items[next];
     int moveIndex = next;
 
@@ -65,13 +70,13 @@ void insertionSort(int items[], int asize) {
   }
 }
 
-void selectionSort(int items[], int asize) {
+void selectionSort(vector<int>& items) {
   // loop over size - 1 elements
-  for (int i = 0; i < asize - 1; ++i) {
+  for (int i = 0; i < items.size() - 1; ++i) {
     int indexOfSmallest = i;
 
     // loop to find index of smallest element
-    for (int index = i + 1; index < asize; ++index) {
+    for (int index = i + 1; index < items.size(); ++index) {
       if (items[index] < items[indexOfSmallest]) {
         indexOfSmallest = index;
       }
@@ -85,7 +90,7 @@ void selectionSort(int items[], int asize) {
 }
 
 // merge two sorted subarrays into one sorted subarray
-void merge(int items[], int left, int middle1, int middle2, int right) {
+void merge(vector<int>& items, int left, int middle1, int middle2, int right) {
   int leftIndex = left;
   int rightIndex = middle2;
   // index into temporary working array
@@ -93,7 +98,7 @@ void merge(int items[], int left, int middle1, int middle2, int right) {
   // only care about left-right area
   int combinedIndex = left;
   int combinedSize = right + 1;
-  int combined[combinedSize];  // NOLINT
+  vector<int> combined(combinedSize);
 
   // merge arrays until reaching end of either
   while (leftIndex <= middle1 && rightIndex <= right) {
@@ -124,14 +129,14 @@ void merge(int items[], int left, int middle1, int middle2, int right) {
   }
 }
 
-void mergeSort(int items[], int low, int high) {
+void mergeSort(vector<int>& items, int low, int high) {
   // test base case; size of array equals 1
   if ((high - low) >= 1) {
     int middle1 = (low + high) / 2;
     int middle2 = middle1 + 1;
 
     // split array in half; sort each half (recursive calls)
-    mergeSort(items, low, middle1);  // first half of array
+    mergeSort(items, low, middle1);   // first half of array
     mergeSort(items, middle2, high);  // second half of array
 
     // merge two sorted arrays after split calls return
@@ -141,40 +146,37 @@ void mergeSort(int items[], int low, int high) {
 
 void testSimple() {
   const int kArraySize = 20;
-  int arr[kArraySize];
+  vector<int> arr(kArraySize);
 
   cout << endl << "*** Start testSimple ***" << endl << endl;
-  fillRandom(arr, kArraySize);
-  cout << "Initial array is:" << endl;
-  printArray(arr, kArraySize);
+  fillRandom(arr);
+  cout << "Initial array is: " << arr << endl;
   int value = arr[rand() % kArraySize];
   cout << "Finding " << value << " using linear search" << endl;
-  int vindex = linearSearch(arr, kArraySize, value);
+  int vindex = linearSearch(arr, value);
   cout << "index for " << value << " is  " << vindex << endl;
 
   cout << endl << "sorting array using insertion sort" << endl;
-  insertionSort(arr, kArraySize);
-  cout << "Sorted array is:" << endl;
-  printArray(arr, kArraySize);
+  insertionSort(arr);
+  cout << "Sorted array is: " << arr << endl;
 
   cout << endl << "Finding " << value << " using binary search" << endl;
-  vindex = binarySearch(arr, kArraySize, value);
+  vindex = binarySearch(arr, value);
   cout << "index for " << value << " is  " << vindex << endl;
-  printArray(arr, kArraySize);
+  cout << "Array is: " << arr << endl;
 
   cout << endl << "filling array with random numbers, array is:" << endl;
-  fillRandom(arr, kArraySize);
-  printArray(arr, kArraySize);
+  fillRandom(arr);
+  cout << "Array is: " << arr << endl;
   cout << "sorting array using selection sort" << endl;
-  selectionSort(arr, kArraySize);
-  cout << "Sorted array is:" << endl;
-  printArray(arr, kArraySize);
+  selectionSort(arr);
+  cout << "Sorted array is: " << arr << endl;
 
   cout << endl << "filling array with random numbers, array is:" << endl;
-  fillRandom(arr, kArraySize);
-  printArray(arr, kArraySize);
+  fillRandom(arr);
+  cout << "Array is: " << arr << endl;
   cout << "sorting array using merge sort" << endl;
   mergeSort(arr, 0, kArraySize - 1);
   cout << "Sorted array is:" << endl;
-  printArray(arr, kArraySize);
+  cout << "Sorted array is: " << arr << endl;
 }

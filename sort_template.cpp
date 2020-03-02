@@ -1,67 +1,69 @@
 /**
- * Sort functions using STL array and templates
- * Based on Deitel
+ * Sort functions on integers
+ *
  **/
 
-
 #include <iostream>
-#include <array>
+#include <vector>
 
 using namespace std;
 
-template<typename T, size_t size>
-void printArray(const array<T, size> &items) {
-  for (int i = 0; i < size; ++i) {
-    cout << items[i] << " ";
-  }
-  cout << endl;
-}
-
-template<typename T, size_t size>
-void fillRandom(array<T, size> &items) {
-  for (int i = 0; i < size; ++i) {
-    items[i] = rand() % 100;
-  }
-}
-
-template<typename T, size_t size>
-int linearSearch(const array<T, size> &items, const T &key) {
-  for (size_t i{0}; i < items.size(); ++i) {
-    if (key == items[i]) {  // if found,
-      return i;  // return location of key
+template <class T>
+ostream& operator<<(ostream& os, const vector<T>& v) {
+  os << "[";
+  if (!v.empty()) {
+    os << v[0];
+    for (int i = 1; i < v.size(); ++i) {
+      os << "  " << v[i];
     }
   }
-  return -1;  // key not found
+  os << "]";
+  return os;
 }
 
-template<typename T, size_t size>
-int binarySearch(const array<T, size> &items, const T &key) {
-  int low{0};  // low index of elements to search
-  int high{static_cast<int>(items.size()) - 1};  // high index
-  int middle{(low + high + 1) / 2};  // middle element
-  int location{-1};  // key's index; -1 if not found
+template <class T>
+void fillRandomChar(vector<T>& items) {
+  for (int i = 0; i < items.size(); ++i) {
+    // 'a' = 97
+    items[i] = 'a' + rand() % 26;
+  }
+}
 
-  do {  // loop to search for element
+template <class T>
+int linearSearch(const vector<T>& items, T key) {
+  for (int i = 0; i < items.size(); ++i) {
+    if (key == items[i]) {
+      return i;
+    }
+  }
+  return -1;
+}
+
+template <class T>
+int binarySearch(const vector<T>& items, T key) {
+  int low = 0;
+  int high = items.size() - 1;
+  int middle{(low + high + 1) / 2};
+
+  while (low <= high) {
     // if the element is found at the middle
     if (key == items[middle]) {
-      location = middle;  // location is the current middle
-    } else if (key < items[middle]) {  // middle is too high
-      high = middle - 1;  // eliminate the higher half
-    } else {  // middle element is too low
-      low = middle + 1;  // eliminate the lower half
+      return middle;
+    } else if (key < items[middle]) {
+      high = middle - 1;
+    } else {
+      low = middle + 1;
     }
-    middle = (low + high + 1) / 2;  // recalculate the middle
-  } while ((low <= high) && (location == -1));
-
-  return location;  // return location of key
+    middle = (low + high + 1) / 2;
+  }
+  return -1;
 }
 
-template<typename T, size_t size>
-void insertionSort(array<T, size> &items) {
-  // loop over the elements of the array
-  for (size_t next{1}; next < items.size(); ++next) {
-    T insert{items[next]};  // save value of next item to insert
-    size_t moveIndex{next};  // initialize location to place element
+template <class T>
+void insertionSort(vector<T>& items) {
+  for (int next = 1; next < items.size(); ++next) {
+    int insert = items[next];
+    int moveIndex = next;
 
     // search for the location in which to put the current element
     while ((moveIndex > 0) && (items[moveIndex - 1] > insert)) {
@@ -74,35 +76,37 @@ void insertionSort(array<T, size> &items) {
   }
 }
 
-template<typename T, size_t size>
-void selectionSort(array<T, size> &items) {
+template <class T>
+void selectionSort(vector<T>& items) {
   // loop over size - 1 elements
-  for (size_t i{0}; i < items.size() - 1; ++i) {
-    size_t indexOfSmallest{i};  // will hold index of smallest element
+  for (int i = 0; i < items.size() - 1; ++i) {
+    int indexOfSmallest = i;
 
     // loop to find index of smallest element
-    for (size_t index{i + 1}; index < items.size(); ++index) {
+    for (int index = i + 1; index < items.size(); ++index) {
       if (items[index] < items[indexOfSmallest]) {
         indexOfSmallest = index;
       }
     }
 
     // swap the elements at positions i and indexOfSmallest
-    T hold{items[i]};
+    int hold = items[i];
     items[i] = items[indexOfSmallest];
     items[indexOfSmallest] = hold;
   }
 }
 
-
 // merge two sorted subarrays into one sorted subarray
-template<typename T, size_t size>
-void merge(array<T, size> &items,
-           size_t left, size_t middle1, size_t middle2, size_t right) {
-  size_t leftIndex{left};  // index into left subarray
-  size_t rightIndex{middle2};  // index into right subarray
-  size_t combinedIndex{left};  // index into temporary working array
-  array<T, size> combined;  // working array
+template <class T>
+void merge(vector<T>& items, int left, int middle1, int middle2, int right) {
+  int leftIndex = left;
+  int rightIndex = middle2;
+  // index into temporary working array
+  // [.... left ... middle1 middle2 ... right]
+  // only care about left-right area
+  int combinedIndex = left;
+  int combinedSize = right + 1;
+  vector<T> combined(combinedSize);
 
   // merge arrays until reaching end of either
   while (leftIndex <= middle1 && rightIndex <= right) {
@@ -115,31 +119,33 @@ void merge(array<T, size> &items,
     }
   }
 
-  if (leftIndex == middle2) {  // if at end of left array
-    while (rightIndex <= right) {  // copy in rest of right array
+  if (leftIndex == middle2) {
+    // if at end of left array copy rest
+    while (rightIndex <= right) {
       combined[combinedIndex++] = items[rightIndex++];
     }
-  } else {  // at end of right array
-    while (leftIndex <= middle1) {  // copy in rest of left array
+  } else {
+    // if at end of right array copy rest
+    while (leftIndex <= middle1) {
       combined[combinedIndex++] = items[leftIndex++];
     }
   }
 
   // copy values back into original array
-  for (size_t i = left; i <= right; ++i) {
+  for (int i = left; i <= right; ++i) {
     items[i] = combined[i];
   }
 }
 
-template<typename T, size_t size>
-void mergeSort(array<T, size> &items, size_t low, size_t high) {
+template <class T>
+void mergeSort(vector<T>& items, int low, int high) {
   // test base case; size of array equals 1
-  if ((high - low) >= 1) {  // if not base case
-    size_t middle1{(low + high) / 2};  // calculate middle of array
-    size_t middle2{middle1 + 1};  // calculate next element over
+  if ((high - low) >= 1) {
+    int middle1 = (low + high) / 2;
+    int middle2 = middle1 + 1;
 
     // split array in half; sort each half (recursive calls)
-    mergeSort(items, low, middle1);  // first half of array
+    mergeSort(items, low, middle1);   // first half of array
     mergeSort(items, middle2, high);  // second half of array
 
     // merge two sorted arrays after split calls return
@@ -148,41 +154,38 @@ void mergeSort(array<T, size> &items, size_t low, size_t high) {
 }
 
 void testTemplate() {
-  const int arraysize = 20;
-  array<int, arraysize> arr;
+  const int kArraySize = 20;
+  vector<char> arr(kArraySize);
 
-  cout << endl << "*** Start testTemplate ***" << endl << endl;
-  fillRandom(arr);
-  cout << "Initial array is:" << endl;
-  printArray(arr);
-  int value = arr[rand() % arraysize];
+  cout << endl << "*** Start testSimple ***" << endl << endl;
+  fillRandomChar(arr);
+  cout << "Initial array is: " << arr << endl;
+  char value = arr[rand() % kArraySize];
   cout << "Finding " << value << " using linear search" << endl;
   int vindex = linearSearch(arr, value);
   cout << "index for " << value << " is  " << vindex << endl;
 
   cout << endl << "sorting array using insertion sort" << endl;
   insertionSort(arr);
-  cout << "Sorted array is:" << endl;
-  printArray(arr);
+  cout << "Sorted array is: " << arr << endl;
 
   cout << endl << "Finding " << value << " using binary search" << endl;
   vindex = binarySearch(arr, value);
   cout << "index for " << value << " is  " << vindex << endl;
-  printArray(arr);
+  cout << "Array is: " << arr << endl;
 
   cout << endl << "filling array with random numbers, array is:" << endl;
-  fillRandom(arr);
-  printArray(arr);
+  fillRandomChar(arr);
+  cout << "Array is: " << arr << endl;
   cout << "sorting array using selection sort" << endl;
   selectionSort(arr);
-  cout << "Sorted array is:" << endl;
-  printArray(arr);
+  cout << "Sorted array is: " << arr << endl;
 
   cout << endl << "filling array with random numbers, array is:" << endl;
-  fillRandom(arr);
-  printArray(arr);
+  fillRandomChar(arr);
+  cout << "Array is: " << arr << endl;
   cout << "sorting array using merge sort" << endl;
-  mergeSort(arr, 0, arraysize - 1);
+  mergeSort(arr, 0, kArraySize - 1);
   cout << "Sorted array is:" << endl;
-  printArray(arr);
+  cout << "Sorted array is: " << arr << endl;
 }
